@@ -38,8 +38,8 @@
                         mysqli_query($db, "CREATE TABLE WRs(Name VARCHAR(255), Yards int, Touchdowns int, Drops int, Team VARCHAR(255), PRIMARY KEY (Name))");
                         mysqli_query($db, "CREATE TABLE TeamCoaches(Team VARCHAR(255), QBCoach VARCHAR(255), RBCoach VARCHAR(255), WRCoach VARCHAR(255), PRIMARY KEY (Team))");
                         mysqli_query($db, "CREATE TABLE Coach(CoachName VARCHAR(255), Team VARCHAR(255), Wins int, Losses int, PRIMARY KEY (CoachName))");
-                        mysqli_query($db, "CREATE TABLE CoachOffensiveFormations(CoachName VARCHAR(255), OffensiveFormation VARCHAR(255), PRIMARY KEY (OffensiveFormation))");
-                        mysqli_query($db, "CREATE TABLE CoachDefensiveFormations(CoachName VARCHAR(255), DefensiveFormation VARCHAR(255), PRIMARY KEY (DefensiveFormation))");
+                        mysqli_query($db, "CREATE TABLE CoachOffensiveFormations(CoachName VARCHAR(255), OffensiveFormation VARCHAR(255), PRIMARY KEY (CoachName, OffensiveFormation))");
+                        mysqli_query($db, "CREATE TABLE CoachDefensiveFormations(CoachName VARCHAR(255), DefensiveFormation VARCHAR(255), PRIMARY KEY (CoachName, DefensiveFormation))");
                         mysqli_query($db, "CREATE TABLE TeamDefense(DefenseName VARCHAR(255), Interceptions int, FumbleRecoveries int, YardsAllowed int, DefensiveCoordinator VARCHAR(255), PRIMARY KEY (DefenseName))");
                         mysqli_query($db, "CREATE TABLE DefensiveCoordinators(DefensiveCoordinator VARCHAR(255), Playbook VARCHAR(255), PRIMARY KEY (DefensiveCoordinator))");
                         mysqli_query($db, "CREATE TABLE TeamOffense(OffenseName VARCHAR(255), Touchdowns int, Yards int, OffensiveRank int, PRIMARY KEY (OffenseName))");
@@ -144,6 +144,7 @@
                         mysqli_query($db, 'INSERT INTO TeamOffense VALUES("Colts", 65, 5700, 1)');
                         mysqli_query($db, 'INSERT INTO TeamOffense VALUES("Chargers", 48, 5400, 9)');
                         mysqli_query($db, 'INSERT INTO Stadium VALUES("Invesco Field at Mile High", "Broncos", "Denver, CO", "2001", 76125)');
+                        mysqli_query($db, 'INSERT INTO Stadium VALUES("City Stadium", "Packers", "Green Bay, WI", "1925", 25000)');
                         mysqli_query($db, 'INSERT INTO Stadium VALUES("Lambeau Field", "Packers", "Green Bay, WI", "1957", 80735)');
                         mysqli_query($db, 'INSERT INTO Stadium VALUES("Lincoln Financial Field", "Eagles", "Philadelphia, PA", "2003", 69176)');
                         mysqli_query($db, 'INSERT INTO Stadium VALUES("Century Link Field", "Seahawks", "Seattle, WA", "2002", 67000)');
@@ -169,21 +170,20 @@
                         $query = "";
                         break;
                     }
-                        /*
-                         * SELECT * FROM Positions WHERE Position = “Quarterback”;
-SELECT * FROM Coach WHERE Losses < 5 ORDER BY Team;
-SELECT PlayerName, Points FROM FantasyLeaders WHERE Points > 100 ORDER BY Points DESC
-LIMIT 5;
-SELECT TeamCoaches.RBCoach, RBs.* FROM TeamCoaches, RBs WHERE TeamCoaches.Team = RBs.Team;
-/SELECT * FROM CoachDefensiveFormations WHERE CoachName <> “John Fox” GROUP BY CoachName;
-
-//SELECT * FROM CoachDefensiveFormations WHERE CoachName <> “John Fox” GROUP BY CoachName HAVING ?????;
-
-
-UPDATE Stadium SET StadiumName = “Sports Authority Field" WHERE StadiumName
- = “Invesco Field at Mile High”;
-
-                         */
+                    case 'CREATE USER':
+                    {
+                        $query = "CREATE USER 'test'@'localhost'";
+                        break;
+                    }
+                    case 'DROP USER':
+                    {
+                        $query = "DROP USER 'test'@'localhost'";
+                        break;
+                    }
+                    case 'ROLLBACK':
+                    {
+                        break;
+                    }
                 }
 
                 $makedb = 0;
@@ -220,7 +220,28 @@ UPDATE Stadium SET StadiumName = “Sports Authority Field" WHERE StadiumName
         Select Query:
         <select name="querylist" form="query">
             <option value='Create Tables' >Create Tables</option>
-            <option value="Insert Data">Insert Data</option>
+            <option value='Insert Data'>Insert Data</option>
+            <option value="SELECT * FROM Positions WHERE Position = 'Quarterback';">1) SELECT * FROM Positions WHERE Position = 'Quarterback';</option>
+            <option value="SELECT * FROM Coach WHERE Losses < 5 ORDER BY Team;">2) SELECT * FROM Coach WHERE Losses < 5 ORDER BY Team;</option>
+            <option value="SELECT PlayerName, Points FROM FantasyLeaders WHERE Points > 100 ORDER BY Points DESC LIMIT 3;">
+                3) SELECT PlayerName, Points FROM FantasyLeaders WHERE Points > 100 ORDER BY Points DESC LIMIT 3;</option>
+            <option value="SELECT TeamCoaches.RBCoach, RBs.* FROM TeamCoaches, RBs WHERE TeamCoaches.Team = RBs.Team;">
+                4) SELECT TeamCoaches.RBCoach, RBs.* FROM TeamCoaches, RBs WHERE TeamCoaches.Team = RBs.Team;</option>
+            <option value="SELECT CoachName FROM CoachDefensiveFormations WHERE CoachName NOT LIKE 'John Fox' GROUP BY CoachName;">
+                5) SELECT CoachName FROM CoachDefensiveFormations WHERE CoachName NOT LIKE 'John Fox' GROUP BY CoachName;</option>
+            <option value="SELECT Team, SUM(Yards) AS sum FROM QBs WHERE Yards > 0 GROUP BY Team HAVING sum >= 5000;">
+                6) SELECT Team, SUM(Yards) AS sum FROM QBs WHERE Yards > 0 GROUP BY Team HAVING sum >= 5000;</option>
+            <option value="select from where two implied joins">
+                7) select from where two implied joins</option>
+            <option value="SELECT StadiumName, DateOpened FROM Stadium WHERE StadiumName NOT IN (SELECT StadiumName FROM Stadium WHERE Occupancy > 50000);">
+                8) SELECT StadiumName, DateOpened FROM Stadium WHERE StadiumName NOT IN (SELECT StadiumName FROM Stadium WHERE Occupancy > 50000);</option>
+            <option value="SET command with nontrivial where">
+                9) SET command with nontrivial where</option>
+            <option value='UPDATE Stadium SET StadiumName = "Sports Authority Field" WHERE (Occupancy >= 60000 && Occupancy <= 80000) && StadiumName RLIKE BINARY "^I";'>
+                10) UPDATE Stadium SET StadiumName = "Sports Authority Field" WHERE (Occupancy >= 60000 && Occupancy <= 80000) && StadiumName RLIKE BINARY "^I";</option>
+            <option value="CREATE USER">11) CREATE USER ‘test’@‘localhost’;</option>
+            <option value="DROP USER">12) DROP USER ‘test’@‘localhost’;</option>
+            <option value="ROLLBACK">13) START TRANSACTION, ROLLBACK</option>
 
         </select>
         <br/>
